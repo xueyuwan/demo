@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+    <meta name="format-detection" content="telephone = no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link href="css/public.css" rel="stylesheet" />
+    <link href="css/page.css" rel="stylesheet" />
+</head>
+<body>
+<div class="page-wrap page-search">
+    <!--头部-->
+    <div class="header-title-box ac">
+        <div class="header-title ac">
+            <a href="javascript:history.back(-1)" class="back-box">
+              <span class="left-icon"></span><span class="left-text">返回</span>
+            </a>
+            <h1>搜索</h1>
+        </div>
+    </div>
+    <!--头部END-->
+    <div class="search-box">
+        <div class="search-group">
+            <i class="search-icon"></i>
+            <input type="text" class="search-ipt" placeholder="开单医生姓名、药品名称、患者姓名">
+        </div>
+        <span class="queding" style="float: right;margin-right:30px">搜索</span>
+    </div>
+     <ul class="default-list ac" style="margin-top:30px;background: #fff;">
+
+     </ul>
+</div>
+<script src="js/jquery-1.11.1.min.js"></script>
+</body>
+</html>
+<script>
+   
+    $(".queding").on("click",function(){
+         $(".default-list").html("");
+        var cxtj=$(".search-ipt").val(); //查询条件
+        var ysgh = sessionStorage.ysgh;
+        var sqdlx = sessionStorage.sqdlx;
+        var spzt = sessionStorage.spzt;
+        var ym = sessionStorage.ym;
+        var ydx = sessionStorage.ydx;
+        // var ysgh ="";
+        // var sqdlx ="";
+        // var spzt ="";
+        // var ym ="";
+        // var ydx ="";
+        var data={
+                    ysgh:ysgh,
+                    sqdlx:sqdlx,
+                    spzt:spzt,
+                    cxtj:cxtj,
+                    ym:ym,
+                    ydx:ydx
+         };
+        
+          if(cxtj==""||cxtj==null){
+              alert("请输入关键字！");
+          }
+          else{
+               $.ajax({
+                // url: "http://192.168.204.188:8080/ysjgxt/ypsqdlb",
+                url: "http://10.2.4.22:8080/ysjgxt/ypsqdlb",
+                type: "get",
+                datatype: "jsonp",
+                data:'json='+JSON.stringify(data),
+                success: function(data) {  
+                  console.log(data); 
+                  creatList(data);
+                },
+                error: function(data) {
+                    console.log("接口请求失败");
+                }
+            })
+          }    
+    });
+
+   function creatList(data) {
+            var result=data;
+            var spzrText;
+            var sqdlx;
+            var yesno;
+            $(result).each(function(i,value){
+                if(value.spzt==1){
+                    spzrText="未审批";
+                    yesno="no" 
+                }
+                else if(value.spzt==2){
+                    spzrText="已审批";
+                   yesno="yes"
+                }
+                if(value.sqdlx==1){
+                   sqdlx="特殊抗菌药物申请单"
+                }
+                var sqrq=value.sqrq;
+                var newsqrq=sqrq.substring(0,4)+"年"+ sqrq.substring(5,7)+"月"+sqrq.substring(8,10)+"日";
+                var list=`
+                            <li sqdid="${value.sqdid}" sqdlx="${value.sqdlx}" sqrxm="${value.sprxm}">
+                                <div class="item-inner">
+                                    <div class="item-content">
+                                        <div class="text-box first">
+                                            <div class="text"><span>申请人:</span><span >${value.sqysxm}</span></div>
+                                            <div class="text center"><span>审批人:</span><span>${value.sprxm}</span></div>
+                                            <div class="text zt"><span class="spzt ${yesno}">${spzrText}</span></div>
+                                        </div>
+                                        <div class="text-box">
+                                            <div class="text"><span>患者姓名:</span><span>${value.hzxm}</span></div>
+                                            <div class="text center"> <span>药品名称:</span><span>${value.ypmc}</span></div>
+                                          
+                                        </div>
+                                        <div class="text-box">
+                                            <div class="text"><span>申请单类型:</span><span>${value.sqdlx}</span></div>
+                                            <div class="text"><span>${newsqrq}</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                `
+                $(".default-list").append(list);
+                
+            })
+        }
+ $(".default-list").on("click","li",function(){
+        var _sqdid=$(this).attr("sqdid");
+        var _sqdlx=$(this).attr("sqdlx");
+        var _sprxm=$(this).attr("sprxm");
+        sessionStorage.sqdid=_sqdid;
+        sessionStorage.sqdlx=_sqdlx;
+        sessionStorage.sprxm=_sprxm;
+        window.location.href="application.html"
+    })
+
+
+</script>

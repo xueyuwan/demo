@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+    <meta name="format-detection" content="telephone = no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link href="css/public.css" rel="stylesheet" />
+    <link href="css/page.css" rel="stylesheet" />
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="layer/layer.js"></script>
+    <style>
+        html,body{
+            padding-bottom:20px;
+        }
+        .layui-layer-setwin .layui-layer-close2{
+            display: none;
+        }
+        .layui-layer-dialog .layui-layer-content{
+            font-size:1.25rem;
+            text-align: center;
+        }
+        .layui-layer-btn {
+            position:relative;
+            text-align: center;
+            height:3.5rem;
+
+            padding:0;
+        }
+        .layui-layer-btn:before{
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: auto;
+            bottom: auto;
+            height: 1px;
+            width: 100%;
+            background-color: #cfcfcf;
+            display: block;
+            z-index: 15;
+            transform-origin: 50% 100%;
+        }
+       .layui-layer-btn a{
+           font-size:1.2rem;
+           width: 49%;
+           height:100%;
+           line-height:3.5rem;
+            margin: 0;
+            padding:0;
+           color:#29b356;
+           border:none;
+           background-color:#fff;
+       }
+        .layui-layer-btn .layui-layer-btn0 {
+            border-color: #fff;
+            background-color: #fff;
+            color:#29b356;
+            border-right:1px solid #cfcfcf;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrap page-application">
+    <!--头部-->
+    <div class="header-title-box ac">
+        <div class="header-title ac">
+            <a href="javascript:history.back(-1)" class="back-box">
+              <span class="left-icon"></span><span class="left-text">返回</span>
+            </a>
+            <h1>详细申请</h1>
+            <a href="javascript:void(0)" class="icon-bar left"></a>
+            <a href="javascript:void(0)" class="icon-bar right"></a>
+        </div>
+    </div>
+    <!--头部END-->
+    <div class="context-box">
+      <div class="user-box">
+          <div class="text-box">
+              <div class="text"><span>住院号：</span><span class="zyh"></span></div>
+              <div class="text"><span>姓名：</span><span class="xm"></span></div>
+          </div>
+          <div class="text-box">
+              <div class="text"><span>性别：</span><span class="xb"></span></div>
+              <div class="text"><span>年龄：</span><span class="nl"></span></div>
+          </div>
+          <div class="text-box">
+              <div class="text"><span>申请医生：</span><span class="sqys"></span></div>
+              <div class="text"><span>申请日期：</span><span class="sqrq"></span></div>
+          </div>
+      </div>
+    </div>
+    <div class="context-box">
+       <div class="info-box">
+          申请药品: <p class="sqyp"></p>
+          申请理由：<p class="sqly"></p>
+           <p class="info-text">检验信息</p>
+       </div>
+    </div>
+    <div class="context-box">
+        <div class="details-box">
+            <div class="text"><span>感染诊断：</span><span class="grzd"></span></div>
+            <div class="text"><span>感染部位：</span><span class="grbw"></span></div>
+            <div class="text"><span>致病菌：</span><span class="zbj"></span></div>
+            <div class="text"><span>药敏：</span><span class="ym"></span></div>
+            <div class="text"><span>曾使用的抗菌药物：</span><span class="csyyw"></span></div>
+        </div>
+    </div>
+    <div id="suggest-box">
+        <div class="context-box">
+            <div class="view-box">
+                <div class="view-group">
+                    <textarea class="view-item" placeholder="审批意见"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="btn-group">
+            <a href="javascript:void(0)" id="disagree" class="btn disagree"><i></i> 不通过</a>
+            <a href="javascript:void(0)" id="agree" class="btn agree"><i></i> 通过</a>
+        </div>
+    </div>
+    <div class="state-group">
+        <div  class="btn disagree"><i></i> 不通过</div>
+        <div  class="btn agree"><i></i> 通过</div>
+    </div>
+</div>
+<script>
+var sqdid=sessionStorage.sqdid;
+var sqdlx=sessionStorage.sqdlx;
+$(function(){
+    inintData(sqdid,sqdlx);
+})
+
+function inintData(sqdid,sqdlx){
+    var data={
+        sqdid:sqdid,
+        sqdlx:sqdlx
+    }
+    $.ajax({
+                url: "http://10.2.4.22:8080/ysjgxt/ypsqdmx",
+                type: "get",
+                datatype: "json",
+                data:'json='+JSON.stringify(data),
+                success: function(data) {
+                    console.log("请求成功");
+                    console.log(data);
+                        creatList(data);
+                },
+                error: function(data) {
+                    console.log("接口请求失败");
+                }
+            })
+}
+
+
+function creatList(data) {
+    var result=data;
+    var spzt=result.spzt;
+    console.log(spzt);
+        // 1-未审批；
+        // 2-审批通过；
+        // 3-审批未通过
+    var suggestBox=$("#suggest-box");
+    var disagree=$(".state-group .disagree");
+    var agree=$(".state-group .agree");
+    if(spzt==1){
+        suggestBox.show();
+        disagree.hide();
+        agree.hide();
+    }
+    else if(spzt==2){
+        suggestBox.hide();
+        disagree.hide();
+        agree.show();
+        var ysp=`
+         <div class="text"><span>审批人姓名：</span><span class="sprxm">${result.sprxm}</span></div>
+         <div class="text"><span>审批意见：</span><span class="spyj">${result.spyj}</span></div>
+        `
+        $(".context-box .details-box").append(ysp);
+    }
+    else if(spzt==3){
+        suggestBox.hide();
+        disagree.hide();
+        agree.show();
+    }
+ sessionStorage.zyh=result.zyh;
+    $(".zyh").text(result.zyh);
+    $(".xm").text(result.hzxm);
+    $(".xb").text(result.hzxb);
+    $(".nl").text(result.hznl);
+    $(".sqyp").text(result.ypmc);
+    $(".sqly").text(result.sqly);
+    $(".grzd").text(result.grzd);
+    $(".grbw").text(result.grbw);
+    $(".zbj").text(result.zbj);
+    $(".ym").text(result.ymqk);
+    $(".csyyw").text(result.csyyw);
+    $(".sqys").text(result.sqysxm);
+    $(".sqrq").text(result.sqrq);
+}
+
+
+var sprgh="";
+var sprxm=sessionStorage.sprxm;
+var spyj=$("view-item").val();
+
+$('#agree').on("click",function(){
+    _layer1=layer.confirm('您确认通过吗？', {
+        title:false,
+        btn: ['取消', '确定'],
+        btn2: function(index, layero){
+            layer.close(_layer1);
+             console.log("通过");
+            $('#suggest-box').hide();
+            $('.state-group').find('.agree').show();
+            spzt=2;
+            spjg(sqdid,sqdlx,sprgh,sprxm,spyj,spzt);
+        }
+    }, function(index, layero){
+        layer.close(_layer1);
+        // $('#suggest-box').hide();
+    });
+})
+
+$('#disagree').on("click",function(){
+    _layer2=layer.confirm('您确认不通过吗？', {
+        title:false,
+        btn: ['取消', '确定'],
+        btn2: function(index, layero){
+            layer.close(_layer2);
+            console.log("不通过");
+            $('#suggest-box').hide();
+            $('.state-group').find('.disagree').show();
+            spzt=3;
+            spjg(sqdid,sqdlx,sprgh,sprxm,spyj,spzt);
+        }
+    }, function(index, layero){
+        layer.close(_layer2);
+        // $('#suggest-box').hide();
+    });
+})
+
+
+// 提交审批结果
+function spjg(spzt){
+    var data={
+            sqdid:sqdid,
+            sqdlx:sqdlx,
+            sprgh,sprgh,
+            sprxm,sprxm,
+            spyj,spyj,
+            spzt,spzt
+    }
+    $.ajax({
+            url: "http://10.2.4.22:8080/ysjgxt/bcsqdspjg",
+            type: "get",
+            datatype: "json",
+            data: 'json='+JSON.stringify(data),
+            success: function(data) {
+                console.log("请求成功");
+                console.log(data);
+                if (data.tjjg == "1") {
+                    console.log("提交成功！");
+                }
+            },
+            error: function(data) {
+                console.log("接口请求失败");
+            }
+        })
+}
+
+
+ $(".info-text").click(function(){
+            window.location.href="check.html";
+           
+ })
+
+</script>
+</body>
+</html>

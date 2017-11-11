@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+    <meta name="format-detection" content="telephone = no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link href="css/public.css" rel="stylesheet" />
+    <link href="css/page.css" rel="stylesheet" />
+</head>
+<body>
+<div class="page-wrap page-check">
+    <!--头部-->
+    <div class="header-title-box ac">
+        <div class="header-title ac">
+            <a href="javascript:history.back(-1)" class="back-box">
+              <span class="left-icon"></span><span class="left-text">返回</span>
+            </a>
+            <h1>检验检查详情</h1>
+        </div>
+    </div>
+    <!--头部END-->
+    <div class="data-box">
+        <ul class="data-ul">
+            <!--<li>
+                <span class="span-text">白细胞计数(4.0-10.0)</span>
+                <span class="state-text state-text1 up"> <i class="state-icon"></i></span>
+            </li>
+            <li>
+                <span class="span-text">红细胞计数(4.0-5.5)</span>
+                <span class="state-text state-text2"> <i class="state-icon"></i></span>
+            </li>
+            <li>
+                <span class="span-text">血红蛋白测定(120-165)</span>
+                <span class="state-text state-text3">  <i class="state-icon"></i></span>
+            </li>
+            <li>
+                <span class="span-text">红细胞比积(35.0-49.0)</span>
+                <span class="state-text state-text4"><i class="state-icon"></i></span>
+            </li>
+            <li>
+                <span class="span-text">淋巴细胞(20.0-40.0)</span>
+                <span class="state-text state-text5 down"> <i class="state-icon"></i></span>
+            </li>
+            <li>
+                <span class="span-text">红细胞平均血红蛋白量(28.0-32.0)</span>
+                <span class="state-text state-text6"> <i class="state-icon"></i></span>
+            </li>-->
+        </ul>
+    </div>
+</div>
+<script src="js/jquery-1.11.1.min.js"></script>
+</body>
+<script>
+var zyh=sessionStorage.zyh; //申请单id
+$(function(){
+    inintData(zyh);
+})
+
+function inintData(zyh){
+    var data={
+        zyh:zyh
+    }
+    $.ajax({
+                url: "http://10.2.4.22:8080/ysjgxt/ypsqdjymx",
+                type: "get",
+                datatype: "json",
+                data:'json='+JSON.stringify(data),
+                success: function(data) {
+                    console.log("请求成功");
+                    console.log(data);           
+                        creatList(data);
+                },
+                error: function(data) {
+                    console.log("接口请求失败");
+                }
+            })
+}
+function creatList(data) {
+       var result=data;
+       var a;
+       $(result).each(function(i,value){
+            var ycts=value.ycts;
+            console.log(ycts);
+            if(ycts==2){
+               a="up";
+            }
+            if(ycts==3){
+              a="down";
+            } 
+             var list=`
+                <li>
+                    <span class="span-text">${value.jyzb} (${value.ckz}) </span>
+                    <span class="state-text ${a}">${value.jyjg} <i class="state-icon"></i></span>
+                </li>
+               `
+            $(".data-ul").append(list);
+       });
+}
+
+
+
+
+</script>
+</html>
